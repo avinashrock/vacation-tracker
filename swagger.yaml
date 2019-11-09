@@ -1,0 +1,214 @@
+
+swagger: "2.0"
+info:
+  description: It is a service to handle Read,Write and Modify leave requests and track requests
+  version: 1.0.0
+  title: Vacation Tracker
+  contact:
+    email: p.avinash@cerner.com
+host: localhost:8080
+basePath: /service/Vacation-Tracker/1.0.0
+tags:
+- name: login
+  description: logs in user
+- name: leave
+  description: Applies for leave.
+schemes:
+- http
+paths:
+  /login:
+    post:
+      tags:
+      - login
+      summary: Authenticates the user to utilize the service
+      operationId: loginUser
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: Contains user details to authenticate user
+        required: true
+        schema:
+          $ref: '#/definitions/Login'
+      responses:
+        200:
+          description: Successful operation.
+          schema:
+            $ref: '#/definitions/ResponseForLogin'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorCode'
+        500:
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/ErrorMessage'
+  /leave:
+    post:
+      tags:
+      - leave
+      summary: Enables user to apply for leave
+      operationId: applyLeave
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: Contains leave related details which are to be saved
+        required: true
+        schema:
+          $ref: '#/definitions/Leave'
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/Success'
+        400:
+          description: Invalid details provided
+          schema:
+            $ref: '#/definitions/ErrorMessage'
+  /leave/viewLeaveStatus:
+    get:
+      tags:
+      - leave
+      summary: View the leave applicants
+      operationId: viewLeaveStatus
+      produces:
+      - application/json
+      parameters:
+      - name: userId
+        in: query
+        description: Current userId for filtering
+        required: true
+        type: string
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/LeaveStatus'
+        400:
+          description: Something went wrong
+          schema:
+            $ref: '#/definitions/ErrorMessage'
+        401:
+          description: Unauthorized Client Error
+          schema:
+            $ref: '#/definitions/ErrorCode'
+        500:
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorMessage'
+  /leave/updateLeaveStatus:
+    put:
+      tags:
+      - leave
+      summary: Update the leave status for an applicant
+      operationId: updateLeaveStatus
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: leaveId
+        in: query
+        description: id of the user whose status needs to be updated
+        required: true
+        type: number
+      - name: status
+        in: query
+        description: Status of the corresponding associate's leave
+        required: true
+        type: number
+      - name: response
+        in: query
+        description: Manager's response to the corresponding leave
+        required: true
+        type: string
+      responses:
+        200:
+          description: Succefully updated leave status
+          schema:
+            $ref: '#/definitions/Success'
+        404:
+          description: leaveId does not exist
+          schema:
+            $ref: '#/definitions/ErrorMessage'
+        500:
+          description: internal server error
+          schema:
+            $ref: '#/definitions/ErrorMessage'
+definitions:
+  Login:
+    type: object
+    properties:
+      username:
+        type: string
+      password:
+        type: string
+        format: password
+  ResponseForLogin:
+    type: object
+    properties:
+      success:
+        type: boolean
+      userId:
+        type: string
+      name:
+        type: string
+      designation:
+        type: string
+  Leave:
+    type: object
+    properties:
+      userId:
+        type: string
+      start_date:
+        type: string
+        format: date
+      end_date:
+        type: string
+        format: date
+      reason:
+        type: string
+  LeaveStatus:
+    type: object
+    properties:
+      name:
+        type: string
+      leaveId:
+        type: number
+      userId:
+        type: string
+      start_date:
+        type: string
+        format: date
+      end_date:
+        type: string
+        format: date
+      reason:
+        type: string
+      status:
+        type: number
+  ErrorCode:
+    type: object
+    properties:
+      success:
+        type: boolean
+      errorCode:
+        type: integer
+        format: int32
+  ErrorMessage:
+    type: object
+    properties:
+      message:
+        type: string
+  Success:
+    type: object
+    properties:
+      success:
+        type: boolean
